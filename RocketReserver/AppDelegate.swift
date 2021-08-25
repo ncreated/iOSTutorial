@@ -46,6 +46,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         )
 
         Global.rum = RUMMonitor.initialize()
+        Global.sharedTracer = Tracer.initialize(configuration: .init())
 
         Datadog.debugRUM = true
         Datadog.verbosityLevel = .debug
