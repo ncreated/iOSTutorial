@@ -7,20 +7,50 @@
 //
 
 import UIKit
+import Datadog
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        Network.shared.apollo.fetch(query: LaunchListQuery()) { result in
-          switch result {
-          case .success(let graphQLResult):
-            print("Success! Result: \(graphQLResult)")
-          case .failure(let error):
-            print("Failure! Error: \(error)")
-          }
-        }
+        // Setup Datadog
+        Datadog.initialize(
+            appContext: .init(),
+            trackingConsent: .granted,
+            configuration: Datadog.Configuration.builderUsing(
+                rumApplicationID: "<rum-application-id>",
+                clientToken: "<client-token>",
+                environment: "<env>"
+            )
+            .trackUIKitRUMViews()
+            .trackUIKitActions()
+            .trackURLSession(firstPartyHosts: ["apollo-fullstack-tutorial.herokuapp.com"])
+            .setRUMResourceAttributesProvider { request, response, responseData, error in
+                var requestBody: String? = nil
+                var responseBody: String? = nil
+
+                if let data = request.httpBody {
+                    requestBody = String(data: data, encoding: .utf8)
+                }
+
+                if let data = responseData {
+                    responseBody = String(data: data, encoding: .utf8)
+                }
+
+                return [
+                    "request-data": requestBody ?? "<none>",
+                    "response-data": responseBody ?? "<none>",
+                ]
+            }
+            .build()
+        )
+
+        Global.rum = RUMMonitor.initialize()
+        Global.sharedTracer = Tracer.initialize(configuration: .init())
+
+        Datadog.debugRUM = true
+        Datadog.verbosityLevel = .debug
+
         return true
     }
 
