@@ -21,9 +21,9 @@ class MasterViewController: UITableViewController {
         case launches
         case loading
     }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         self.loadMoreLaunchesIfTheyExist()
     }
     
@@ -160,7 +160,7 @@ class MasterViewController: UITableViewController {
                 cell.imageView?.image = placeholder
             }
         case .loading:
-            if self.activeRequest == nil {
+            if self.activeRequest == nil && self.lastConnection != nil {
                 cell.textLabel?.text = "Tap to load more"
             } else {
                 cell.textLabel?.text = "Loading..."
