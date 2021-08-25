@@ -12,7 +12,17 @@ import KeychainSwift
 import Datadog
 
 internal class MyURLSessionClient: URLSessionClient, __URLSessionDelegateProviding {
+
+    // MARK: - __URLSessionDelegateProviding conformance
+
+    /// Datadog delegate object.
+    /// The class implementing `DDURLSessionDelegateProviding` must ensure that following method calls are forwarded to `ddURLSessionDelegate`:
+    /// - `func urlSession(_:task:didFinishCollecting:)`
+    /// - `func urlSession(_:task:didCompleteWithError:)`
+    /// - `func urlSession(_:dataTask:didReceive:)`
     let ddURLSessionDelegate = DDURLSessionDelegate()
+
+    // MARK: - __URLSessionDelegateProviding handling
 
     override func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
         ddURLSessionDelegate.urlSession(session, task: task, didFinishCollecting: metrics)
